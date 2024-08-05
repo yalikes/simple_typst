@@ -1,15 +1,16 @@
-id = "typst"
-name = "Typst"
-description = "Typst support."
-version = "0.0.3"
+id = "simple_typst"
+name = "SimpleTypst"
+description = "A simple typst extension forked from WeetHet/typst.zed"
+version = "0.0.1"
 schema_version = 1
-authors = ["WeetHet <stas.ale66@gmail.com>"]
-repository = "https://github.com/weethet/typst.zed"
+authors = ["algebnaly<mail@algebnaly.com>","WeetHet <stas.ale66@gmail.com>"]
+repository = "https://github.com/yalikes/simple_typst"
 
-[language_servers.tinymist]
+
+[language_servers.typst_lsp]
 name = "Typst language support"
 language = "Typst"
 
 [grammars.typst]
 repository = "https://github.com/uben0/tree-sitter-typst"
-commit = "4610172f312e8ce5184e6882be5ad1a1cd800fbe"
+commit = "abe60cbed7986ee475d93f816c1be287f220c5d8"

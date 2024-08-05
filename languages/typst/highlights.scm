@@ -1,4 +1,6 @@
 ; Taken from https://github.com/uben0/tree-sitter-typst/blob/f457c77edffd4b93190794355ff5acf7acfb99c6/editors/helix/queries/highlights.scm#L4
+; with some modifications
+
 (call
   item: (ident) @function)
 (call
@@ -51,21 +53,17 @@
 (auto) @constant.builtin
 (ident) @variable
 
-; MARKUP
-(item "-" @markup.list)
-(term ["/" ":"] @markup.list)
-(heading "=" @markup.heading.marker) @markup.heading.1
-(heading "==" @markup.heading.marker) @markup.heading.2
-(heading "===" @markup.heading.marker) @markup.heading.3
-(heading "====" @markup.heading.marker) @markup.heading.4
-(heading "=====" @markup.heading.marker) @markup.heading.5
-(heading "======" @markup.heading.marker) @markup.heading.6
+(heading) @title
+(item "-" @operator)
+
 (url) @tag
 (emph) @markup.italic
 (strong) @markup.bold
 (symbol) @constant.character
 (shorthand) @constant.builtin
+
 (quote) @markup.quote
+
 (align) @operator
 (letter) @constant.character
 (linebreak) @constant.builtin

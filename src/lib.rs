@@ -6,7 +6,7 @@ struct TypstExtension {
 }
 
 #[derive(Clone)]
-struct TinymistBinary {
+struct TypstLspBinary {
     path: String,
     environment: Option<Vec<(String, String)>>,
 }
@@ -16,10 +16,10 @@ impl TypstExtension {
         &mut self,
         language_server_id: &zed::LanguageServerId,
         worktree: &zed::Worktree,
-    ) -> Result<TinymistBinary> {
-        if let Some(path) = worktree.which("tinymist") {
+    ) -> Result<TypstLspBinary> {
+        if let Some(path) = worktree.which("typst_lsp") {
             let env = worktree.shell_env();
-            return Ok(TinymistBinary {
+            return Ok(TypstLspBinary {
                 path,
                 environment: Some(env),
             });
@@ -27,7 +27,7 @@ impl TypstExtension {
 
         if let Some(path) = &self.cached_binary_path {
             if fs::metadata(path).map_or(false, |stat| stat.is_file()) {
-                return Ok(TinymistBinary {
+                return Ok(TypstLspBinary {
                     path: path.clone(),
                     environment: None,
                 });
@@ -38,32 +38,24 @@ impl TypstExtension {
             language_server_id,
             &zed::LanguageServerInstallationStatus::CheckingForUpdate,
         );
+
         let release = zed::latest_github_release(
-            "Myriad-Dreamin/tinymist",
+            "nvarner/typst-lsp",
             zed::GithubReleaseOptions {
                 require_assets: true,
                 pre_release: false,
             },
         )?;
 
-        let (platform, arch) = zed::current_platform();
-        let mut asset_name = format!(
-            "tinymist-{os}-{arch}",
-            arch = match arch {
-                zed::Architecture::Aarch64 => "arm64",
-                zed::Architecture::X86 => "x86",
-                zed::Architecture::X8664 => "x64",
-            },
+        let (platform, _arch) = zed::current_platform();
+        let asset_name = format!(
+            "typst-lsp-x86_64-{os}",
             os = match platform {
-                zed::Os::Mac => "darwin",
-                zed::Os::Linux => "linux",
-                zed::Os::Windows => "win32",
+                zed::Os::Mac => "apple-darwin",
+                zed::Os::Linux => "unknown-linux-gnu",
+                zed::Os::Windows => "pc-windows-msvc.exe",
             },
         );
-
-        if platform == zed::Os::Windows {
-            asset_name = format!("{}.exe", asset_name);
-        }
 
         let asset = release
             .assets
@@ -71,10 +63,10 @@ impl TypstExtension {
             .find(|asset| asset.name == asset_name)
             .ok_or_else(|| format!("no asset found matching {:?}", asset_name))?;
 
-        let version_dir = format!("tinymist-{}", release.version);
+        let version_dir = format!("typst_lsp_{}", release.version);
         fs::create_dir_all(&version_dir).map_err(|e| format!("failed to create directory: {e}"))?;
 
-        let binary_path = format!("{version_dir}/tinymist");
+        let binary_path = format!("{version_dir}/typst_lsp");
 
         if !fs::metadata(&binary_path).map_or(false, |stat| stat.is_file()) {
             zed::set_language_server_installation_status(
@@ -102,7 +94,7 @@ impl TypstExtension {
         }
 
         self.cached_binary_path = Some(binary_path.clone());
-        Ok(TinymistBinary {
+        Ok(TypstLspBinary {
             path: binary_path,
             environment: None,
         })
@@ -121,11 +113,11 @@ impl zed::Extension for TypstExtension {
         language_server_id: &zed::LanguageServerId,
         worktree: &zed::Worktree,
     ) -> Result<zed::Command> {
-        let tinymist_binary = self.language_server_binary(language_server_id, worktree)?;
+        let typst_lsp_binary = self.language_server_binary(language_server_id, worktree)?;
         Ok(zed::Command {
-            command: tinymist_binary.path,
-            args: vec!["lsp".to_string()],
-            env: tinymist_binary.environment.unwrap_or_default(),
+            command: typst_lsp_binary.path,
+            args: vec![],
+            env: typst_lsp_binary.environment.unwrap_or_default(),
         })
     }
 }
